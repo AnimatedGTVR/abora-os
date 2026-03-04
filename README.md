@@ -7,6 +7,7 @@ Abora OS is an Arch Linux based distribution project built around KDE Plasma. Th
 - `assets/`: branding and visual assets
 - `distro/archiso/`: first Abora OS `archiso` profile
 - `scripts/build-iso.sh`: wrapper around `mkarchiso`
+- `scripts/rebuild-vm.sh`: one-command rebuild flow for the Arch build VM
 - `docs/roadmap.md`: short-term distro roadmap
 
 ## Current Abora OS direction
@@ -39,4 +40,10 @@ Build the ISO:
 
 ```sh
 ./scripts/build-iso.sh
+```
+
+In the Arch build VM, use the one-command rebuild helper:
+
+```sh
+./scripts/rebuild-vm.sh
 ```
