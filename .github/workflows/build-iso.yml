@@ -36,9 +36,6 @@ jobs:
               ./scripts/build-iso.sh
             '
 
-      - name: Generate release metadata
-        run: ./scripts/release-metadata.sh
-
       - name: Show output files
         run: ls -lah out
 
