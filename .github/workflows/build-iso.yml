@@ -26,7 +26,7 @@ jobs:
             archlinux:latest \
             bash -lc '
               set -euo pipefail
-              pacman -Syu --noconfirm archiso git
+              pacman -Syu --noconfirm archiso git base-devel
               ./scripts/build-iso.sh
             '
 

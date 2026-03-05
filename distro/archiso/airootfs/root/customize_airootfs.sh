@@ -7,6 +7,7 @@ passwd -d liveuser
 install -d -m 0700 -o liveuser -g liveuser /home/liveuser/.config
 cp -a /etc/skel/. /home/liveuser/
 chown -R liveuser:liveuser /home/liveuser
+chmod +x /home/liveuser/Desktop/Install\ Abora\ OS.desktop
 
 install -d -m 0755 /usr/share/wallpapers/Abora
 if [ -f /usr/share/abora/default-wallpaper.png ]; then

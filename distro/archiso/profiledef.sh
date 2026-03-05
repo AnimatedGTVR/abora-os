@@ -12,7 +12,7 @@ bootmodes=(
   "uefi.systemd-boot"
 )
 arch="x86_64"
-pacman_conf="pacman.conf"
+pacman_conf="${ABORA_PACMAN_CONF:-pacman.conf}"
 airootfs_image_type="squashfs"
 bootstrap_tarball_compression=("zstd" "-c" "-T0 --long -19")
 file_permissions=(
@@ -20,6 +20,7 @@ file_permissions=(
   ["/root"]="0:0:750"
   ["/root/customize_airootfs.sh"]="0:0:755"
   ["/etc/sudoers.d/10-liveuser"]="0:0:440"
+  ["/etc/skel/Desktop/Install Abora OS.desktop"]="0:0:755"
   ["/usr/local/bin/abora-live-info"]="0:0:755"
   ["/usr/share/abora"]="0:0:755"
 )

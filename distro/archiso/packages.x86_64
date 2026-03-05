@@ -13,6 +13,7 @@ memtest86+-efi
 
 archlinux-keyring
 arch-install-scripts
+archinstall
 pacman
 
 networkmanager
@@ -53,3 +54,5 @@ htop
 fastfetch
 bash-completion
 syslinux
+abora-installer
+tinypm-abora

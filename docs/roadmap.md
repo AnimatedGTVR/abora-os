@@ -20,7 +20,7 @@
 
 ## Immediate next tasks
 
-- add `airootfs` overlay files for users, sudo, and live session defaults
-- add SDDM and Plasma session defaults to the live image
+- validate the new archinstall-based installer flow end to end
+- decide whether to stay with archinstall or replace it with a Calamares-based GUI later
+- add installed-system integration for Abora local packages such as TinyPM
 - decide how much of KDE Gear ships in the first ISO
-- add installer strategy documentation

@@ -6,6 +6,7 @@ Abora OS is an Arch Linux based distribution project built around KDE Plasma. Th
 
 - `assets/`: branding and visual assets
 - `distro/archiso/`: first Abora OS `archiso` profile
+- `packages/`: local Arch packages built into the Abora ISO
 - `scripts/build-iso.sh`: wrapper around `mkarchiso`
 - `scripts/rebuild-vm.sh`: one-command rebuild flow for the Arch build VM
 - `docs/roadmap.md`: short-term distro roadmap
@@ -22,6 +23,8 @@ Abora OS is an Arch Linux based distribution project built around KDE Plasma. Th
 ## What exists now
 
 - an `archiso` profile with Abora branding files
+- an `archinstall`-based installer wrapper with a live desktop launcher
+- a local package wrapper for TinyPM that installs into the ISO
 - a first-pass Plasma-based package manifest for a live image
 - a build script that calls `mkarchiso`
 - planning docs for the next distro milestones
