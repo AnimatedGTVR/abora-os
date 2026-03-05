@@ -47,3 +47,5 @@ In the Arch build VM, use the one-command rebuild helper:
 ```sh
 ./scripts/rebuild-vm.sh
 ```
+
+`rebuild-vm.sh` handles build-disk mount, pacman cache bind-mount, repo update, and ISO build in one run.
