@@ -1,0 +1,41 @@
+name: Build Abora ISO
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "distro/**"
+      - "scripts/**"
+      - "assets/wallpaper.png"
+      - ".github/workflows/build-iso.yml"
+
+jobs:
+  build-iso:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build ISO in Arch container
+        run: |
+          docker run --rm --privileged \
+            -v "$GITHUB_WORKSPACE:/workspace" \
+            -w /workspace \
+            archlinux:latest \
+            bash -lc '
+              set -euo pipefail
+              pacman -Syu --noconfirm archiso git
+              ./scripts/build-iso.sh
+            '
+
+      - name: Show output files
+        run: ls -lah out
+
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: abora-iso-${{ github.run_number }}
+          path: out/*.iso
+          if-no-files-found: error

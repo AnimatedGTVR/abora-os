@@ -49,3 +49,7 @@ In the Arch build VM, use the one-command rebuild helper:
 ```
 
 `rebuild-vm.sh` handles build-disk mount, pacman cache bind-mount, repo update, and ISO build in one run.
+
+No local Arch VM:
+
+Use the GitHub Actions workflow `Build Abora ISO` from the Actions tab. It builds the ISO in an Arch container and uploads `out/*.iso` as a downloadable artifact.
