@@ -17,6 +17,13 @@ if ! command -v mkarchiso >/dev/null 2>&1; then
     exit 1
 fi
 
+if command -v pacman-key >/dev/null 2>&1; then
+    if [ ! -s /etc/pacman.d/gnupg/pubring.kbx ]; then
+        pacman-key --init
+        pacman-key --populate archlinux
+    fi
+fi
+
 if [ ! -f "$source_wallpaper" ]; then
     echo "Missing default wallpaper: $source_wallpaper" >&2
     exit 1
