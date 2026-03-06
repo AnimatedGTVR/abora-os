@@ -8,5 +8,5 @@ Exec=abora-installer-launcher
 Icon=drive-harddisk-system
 Terminal=false
 Categories=System;Settings;
-Keywords=install;installer;archinstall;abora;
+Keywords=install;installer;calamares;abora;
 StartupNotify=true

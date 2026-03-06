@@ -13,9 +13,9 @@ Use this after building a release candidate ISO and after running one real insta
 
 ## Installer
 
-- `Install Abora OS` opens the Abora installer wrapper
-- `archinstall` launches with Abora defaults preloaded
-- disk selection and user creation still remain interactive
+- `Install Abora OS` opens Calamares
+- Abora branding appears inside the installer
+- disk selection and user creation remain interactive
 - install completes without fatal errors
 
 ## Installed System

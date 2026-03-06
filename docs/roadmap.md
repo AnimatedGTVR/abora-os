@@ -20,7 +20,7 @@
 
 ## Immediate next tasks
 
-- validate the new archinstall-based installer flow end to end
+- validate the new Calamares installer flow end to end
 - confirm installed systems receive Abora defaults and TinyPM correctly
-- decide whether to stay with archinstall or replace it with a Calamares-based GUI later
+- harden Calamares branding and module configuration after the first successful install test
 - decide how much of KDE Gear ships in the first ISO
