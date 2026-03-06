@@ -12,6 +12,7 @@ Abora OS is an Arch Linux based distribution project built around KDE Plasma. Th
 - `docs/roadmap.md`: short-term distro roadmap
 - `docs/install-checklist.md`: live/install validation checklist
 - `docs/release-checklist.md`: release gate checklist
+- `docs/calamares-plan.md`: Calamares installer notes
 - `RELEASE_NOTES.md`: current release notes
 
 ## Current Abora OS direction
@@ -26,7 +27,8 @@ Abora OS is an Arch Linux based distribution project built around KDE Plasma. Th
 ## What exists now
 
 - an `archiso` profile with Abora branding files
-- an `archinstall`-based installer wrapper with a live desktop launcher
+- a local Calamares package path for the live ISO
+- a GUI-first installer launcher that targets Calamares
 - an `abora-defaults` package for installed-system branding and first-boot checks
 - a local package wrapper for TinyPM that installs into the ISO
 - a first-pass Plasma-based package manifest for a live image

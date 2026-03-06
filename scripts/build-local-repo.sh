@@ -26,6 +26,49 @@ mkdir -p "$builder_home"
 mkdir -p "$local_repo_dir" "$package_work_dir"
 rm -f "$local_repo_dir"/*.pkg.tar.* "$local_repo_dir"/abora-local.db* "$local_repo_dir"/abora-local.files*
 
+local_package_names=()
+for pkg_dir in "$packages_dir"/*; do
+    [ -d "$pkg_dir" ] || continue
+    local_package_names+=("$(basename "$pkg_dir")")
+done
+
+install_repo_deps() {
+    local pkgbuild_path="$1"
+    local deps_output dep dep_name is_local
+    local repo_deps=()
+
+    deps_output="$(
+        PKGBUILD_PATH="$pkgbuild_path" bash -lc '
+          set -euo pipefail
+          source "$PKGBUILD_PATH"
+          for dep in "${depends[@]-}" "${makedepends[@]-}"; do
+            [ -n "$dep" ] || continue
+            dep="${dep%%[<>=:]*}"
+            printf "%s\n" "$dep"
+          done | sort -u
+        '
+    )"
+
+    while IFS= read -r dep; do
+        [ -n "$dep" ] || continue
+        is_local=0
+        for dep_name in "${local_package_names[@]}"; do
+            if [ "$dep" = "$dep_name" ]; then
+                is_local=1
+                break
+            fi
+        done
+        [ "$is_local" -eq 1 ] && continue
+        repo_deps+=("$dep")
+    done <<EOF
+$deps_output
+EOF
+
+    if [ "${#repo_deps[@]}" -gt 0 ]; then
+        pacman -S --needed --noconfirm "${repo_deps[@]}"
+    fi
+}
+
 for pkg_dir in "$packages_dir"/*; do
     [ -d "$pkg_dir" ] || continue
 
@@ -36,6 +79,8 @@ for pkg_dir in "$packages_dir"/*; do
     rm -rf "$build_dir"
     mkdir -p "$build_dir" "$srcdest"
     cp -a "$pkg_dir/." "$build_dir/"
+
+    install_repo_deps "$build_dir/PKGBUILD"
 
     chown -R "$builder_user:$builder_user" "$build_dir" "$srcdest" "$local_repo_dir" "$builder_home"
 

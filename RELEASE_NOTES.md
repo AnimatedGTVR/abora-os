@@ -8,7 +8,7 @@ It currently provides:
 
 - an Arch-based live ISO
 - KDE Plasma live environment defaults
-- a GUI-first Abora installer launcher backed by `archinstall`
+- a GUI-first Abora installer launcher targeting Calamares
 - TinyPM packaged into the ISO through an Abora package wrapper
 - Abora defaults and first-boot helper tooling
 
@@ -23,7 +23,7 @@ It currently provides:
 
 ## Known limitations
 
-- installer backend is still `archinstall`, not a full native GUI installer stack like Calamares
+- Calamares integration is newly packaged and still needs a real boot/install validation pass
 - installed-system behavior still needs one full end-to-end validation pass
 - package selection is intentionally lean for the first release
 - Abora local packages are currently built into the ISO process rather than hosted in a public package repository

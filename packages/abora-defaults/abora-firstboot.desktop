@@ -9,3 +9,5 @@ Icon=preferences-desktop
 Terminal=false
 Categories=System;Settings;
 StartupNotify=true
+X-GNOME-Autostart-enabled=true
+X-KDE-autostart-after=panel
