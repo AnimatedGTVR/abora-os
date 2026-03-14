@@ -2,6 +2,7 @@
 set -euo pipefail
 
 calamares_cmd="/usr/bin/calamares"
+xauth="${XAUTHORITY:-$HOME/.Xauthority}"
 
 if [[ ! -x "$calamares_cmd" ]]; then
     printf 'Calamares is missing from this image.\n' >&2
@@ -9,17 +10,24 @@ if [[ ! -x "$calamares_cmd" ]]; then
 fi
 
 if [[ "$(id -u)" -eq 0 ]]; then
-    exec env QT_QPA_PLATFORM=xcb "$calamares_cmd"
+    exec "$calamares_cmd"
 fi
 
 if [[ "${USER:-}" = "liveuser" ]]; then
-    exec sudo -E env QT_QPA_PLATFORM=xcb "$calamares_cmd"
+    exec sudo --preserve-env=DISPLAY,XAUTHORITY,DBUS_SESSION_BUS_ADDRESS,XDG_RUNTIME_DIR,WAYLAND_DISPLAY \
+        env \
+        DISPLAY="${DISPLAY:-}" \
+        XAUTHORITY="$xauth" \
+        DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-}" \
+        XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-}" \
+        WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-}" \
+        "$calamares_cmd"
 fi
 
 exec pkexec env \
     DISPLAY="${DISPLAY:-}" \
-    XAUTHORITY="${XAUTHORITY:-}" \
+    XAUTHORITY="$xauth" \
     DBUS_SESSION_BUS_ADDRESS="${DBUS_SESSION_BUS_ADDRESS:-}" \
     XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-}" \
-    QT_QPA_PLATFORM=xcb \
+    WAYLAND_DISPLAY="${WAYLAND_DISPLAY:-}" \
     "$calamares_cmd"
