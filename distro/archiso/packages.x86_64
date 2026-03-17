@@ -58,6 +58,7 @@ htop
 fastfetch
 bash-completion
 squashfs-tools
+rsync
 syslinux
 abora-defaults
 abora-calamares-config
