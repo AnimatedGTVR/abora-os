@@ -25,17 +25,30 @@ mkdir -p "$out_dir"
 
 export NIX_CONFIG="${NIX_CONFIG:-experimental-features = nix-command flakes}"
 
-nix build "$repo_dir#packages.x86_64-linux.iso" --print-build-logs
+nix_target="$repo_dir#packages.x86_64-linux.iso"
+echo "Building target: $nix_target"
 
-result_link="$repo_dir/result"
-if [[ ! -e "$result_link" ]]; then
-    echo "Nix build completed but no result link was found." >&2
+build_output_path="$(
+    nix build "$nix_target" \
+        --print-out-paths \
+        --print-build-logs \
+        --no-link \
+        --show-trace | tail -n 1
+)"
+
+if [[ -z "$build_output_path" || ! -e "$build_output_path" ]]; then
+    echo "Nix build did not return a valid output path." >&2
     exit 1
 fi
 
-iso_src="$(find -L "$result_link" -type f -name '*.iso' | head -n 1)"
-if [[ -z "$iso_src" || ! -f "$iso_src" ]]; then
-    echo "Unable to locate ISO file in Nix build output." >&2
+if [[ -f "$build_output_path" && "$build_output_path" == *.iso ]]; then
+    iso_src="$build_output_path"
+else
+    iso_src="$(find "$build_output_path" -type f -name '*.iso' | head -n 1)"
+fi
+
+if [[ -z "${iso_src:-}" || ! -f "$iso_src" ]]; then
+    echo "Unable to locate ISO file in Nix build output path: $build_output_path" >&2
     exit 1
 fi
 
