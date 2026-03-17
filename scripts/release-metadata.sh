@@ -9,7 +9,13 @@ mkdir -p "$out_dir"
 
 (
     cd "$out_dir"
-    sha256sum ./*.iso > "SHA256SUMS-${version}.txt"
+    shopt -s nullglob
+    iso_files=(./*.iso)
+    if [ "${#iso_files[@]}" -eq 0 ]; then
+        echo "No ISO files found in: $out_dir" >&2
+        exit 1
+    fi
+    sha256sum "${iso_files[@]}" > "SHA256SUMS-${version}.txt"
 )
 
 printf '%s\n' "$version"

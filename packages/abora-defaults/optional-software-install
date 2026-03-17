@@ -2,17 +2,18 @@
 set -euo pipefail
 
 log_file="/var/log/abora-optional-setup.log"
+
+if [[ "${EUID}" -ne 0 ]]; then
+    echo "This helper must run as root."
+    exit 1
+fi
+
 mkdir -p "$(dirname "$log_file")"
 touch "$log_file"
 chmod 0644 "$log_file"
 exec >>"$log_file" 2>&1
 
 printf '\n[%s] optional software install start\n' "$(date -Is)"
-
-if [[ "${EUID}" -ne 0 ]]; then
-    echo "This helper must run as root."
-    exit 1
-fi
 
 if [[ "$#" -eq 0 ]]; then
     echo "No optional components were requested."

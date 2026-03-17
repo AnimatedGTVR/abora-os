@@ -58,6 +58,12 @@ Build the ISO:
 sudo ./scripts/build-iso.sh
 ```
 
+Run script sanity checks:
+
+```sh
+./scripts/check-scripts.sh
+```
+
 In the Arch build VM, use the one-command rebuild helper:
 
 ```sh
