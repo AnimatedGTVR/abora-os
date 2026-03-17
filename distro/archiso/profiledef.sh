@@ -21,6 +21,7 @@ file_permissions=(
   ["/root/customize_airootfs.sh"]="0:0:755"
   ["/etc/sudoers.d/10-liveuser"]="0:0:440"
   ["/etc/skel/Desktop/Install Abora OS.desktop"]="0:0:755"
+  ["/usr/local/bin/abora-live-extensions"]="0:0:755"
   ["/usr/local/bin/abora-live-info"]="0:0:755"
   ["/usr/share/abora"]="0:0:755"
 )
