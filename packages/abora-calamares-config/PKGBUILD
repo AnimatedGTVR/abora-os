@@ -1,6 +1,6 @@
 pkgname=abora-calamares-config
 pkgver=0.1.0
-pkgrel=3
+pkgrel=4
 pkgdesc="Calamares branding and settings for Abora OS"
 arch=('any')
 url="https://github.com/AnimatedGTVR/abora-os"
@@ -10,17 +10,20 @@ source=(
   'abora-logo.png'
   'branding.desc'
   'settings.conf'
+  'unpackfs.conf'
   'show.qml'
 )
 sha256sums=(
   '642675eeda61f3e2abaa207179fa4cae42cd10531c840c0fc4ea232a3a7fcd8c'
   'be73de6d7ffa993d0a927a7281cb7f94a8415041601f1d62db495e8a8b2de924'
-  '972a474f23f42792421546c32a88892089ab42d8caea84f0ae79de31da613706'
+  'd4d3289ba0e7e9ff264f3cf5962d593bddfcb7da403a353583f04b3e1e42eee4'
+  'edc9cd35d0196a8c48412f5e52dde8a8196c334f46ef0a9dde2e40c983767127'
   '43d9604c7f93a4018572b2ccec01891ebe6e4b72d066db45fd498168f5086750'
 )
 
 package() {
   install -Dm644 "$srcdir/settings.conf" "$pkgdir/etc/calamares/settings.conf"
+  install -Dm644 "$srcdir/unpackfs.conf" "$pkgdir/etc/calamares/modules/unpackfs.conf"
   install -Dm644 "$srcdir/abora-logo.png" "$pkgdir/etc/calamares/branding/abora/abora-logo.png"
   install -Dm644 "$srcdir/branding.desc" "$pkgdir/etc/calamares/branding/abora/branding.desc"
   install -Dm644 "$srcdir/show.qml" "$pkgdir/etc/calamares/branding/abora/show.qml"
