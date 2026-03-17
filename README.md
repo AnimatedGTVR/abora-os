@@ -55,7 +55,7 @@ For the ISO:
 Build the ISO:
 
 ```sh
-./scripts/build-iso.sh
+sudo ./scripts/build-iso.sh
 ```
 
 In the Arch build VM, use the one-command rebuild helper:
@@ -72,5 +72,5 @@ Use the GitHub Actions workflow `Build Abora ISO` from the Actions tab. It build
 
 ## Release validation
 
-Use [install-checklist.md](/home/animated/.abora/docs/install-checklist.md) before calling a build releasable.
-Use [release-checklist.md](/home/animated/.abora/docs/release-checklist.md) before publishing 0.1.0.
+Use [docs/install-checklist.md](docs/install-checklist.md) before calling a build releasable.
+Use [docs/release-checklist.md](docs/release-checklist.md) before publishing 0.1.0.

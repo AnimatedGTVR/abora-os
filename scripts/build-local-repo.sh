@@ -18,6 +18,11 @@ if ! command -v repo-add >/dev/null 2>&1; then
     exit 1
 fi
 
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Run as root. This script installs dependencies and creates a build user." >&2
+    exit 1
+fi
+
 if ! id "$builder_user" >/dev/null 2>&1; then
     useradd --system --create-home --home-dir "$builder_home" --shell /bin/bash "$builder_user"
 fi
@@ -31,6 +36,11 @@ for pkg_dir in "$packages_dir"/*; do
     [ -d "$pkg_dir" ] || continue
     local_package_names+=("$(basename "$pkg_dir")")
 done
+
+if [ "${#local_package_names[@]}" -eq 0 ]; then
+    echo "No package directories found under: $packages_dir" >&2
+    exit 1
+fi
 
 install_repo_deps() {
     local pkgbuild_path="$1"

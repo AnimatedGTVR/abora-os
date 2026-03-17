@@ -26,6 +26,7 @@ Use this after building a release candidate ISO and after running one real insta
 - NetworkManager is enabled and functional
 - `abora-doctor` reports the expected services and wallpaper
 - wallpaper and Plasma defaults match the live session
+- first-login "Abora Initial Setup" prompt appears and optional package install path works
 
 ## Bug Report
 

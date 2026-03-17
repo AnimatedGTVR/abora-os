@@ -1,6 +1,6 @@
 pkgname=abora-defaults
 pkgver=0.1.0
-pkgrel=4
+pkgrel=5
 pkgdesc="Default configuration and first-boot experience for Abora OS"
 arch=('any')
 url="https://github.com/AnimatedGTVR/abora-os"
@@ -8,6 +8,9 @@ license=('MIT')
 depends=('bash' 'kdialog' 'networkmanager' 'plasma-meta' 'polkit-kde-agent' 'sddm')
 source=(
   'abora-installer-launcher'
+  'abora-initial-setup'
+  'optional-software-install'
+  'abora-initial-setup.desktop'
   'abora-doctor'
   'fastfetch-config.jsonc'
   'sddm-autologin.conf'
@@ -18,6 +21,9 @@ source=(
 )
 sha256sums=(
   'dd0a73d27309d0f19b7dd6ef29b68e4133ed8c16149ac11917aa8b58b0b34a72'
+  'dd4c2eab569c9a2f057308f32ee3c5b385d943d5e8cc9b7b432f37c01ee41e26'
+  'f27192c4cdbb22bc4ab2c9033f656055dd0394f74a99dc231a3fa3bb796a1924'
+  'f741395d7744c50f1f1261b4f80d699ed89ca77cb200edcb3c891f241c68ad0a'
   '318a263a38888e9695c8ce6abd0e2fb107d855af23b68c12f52421636c0e9cd9'
   'bf5313012796f991b2dcbf0340468d63acbe3caeab4f11b2ea15aa272880c14c'
   'bd0d4c70c990cd915c6b55f1d5e0163285354285803a4330b7ac2470a56479a3'
@@ -29,6 +35,9 @@ sha256sums=(
 
 package() {
   install -Dm755 "$srcdir/abora-installer-launcher" "$pkgdir/usr/bin/abora-installer-launcher"
+  install -Dm755 "$srcdir/abora-initial-setup" "$pkgdir/usr/bin/abora-initial-setup"
+  install -Dm755 "$srcdir/optional-software-install" "$pkgdir/usr/lib/abora/optional-software-install"
+  install -Dm644 "$srcdir/abora-initial-setup.desktop" "$pkgdir/etc/skel/.config/autostart/abora-initial-setup.desktop"
   install -Dm755 "$srcdir/abora-doctor" "$pkgdir/usr/bin/abora-doctor"
   install -Dm644 "$srcdir/fastfetch-config.jsonc" "$pkgdir/etc/xdg/fastfetch/config.jsonc"
   install -Dm644 "$srcdir/fastfetch-config.jsonc" "$pkgdir/etc/skel/.config/fastfetch/config.jsonc"

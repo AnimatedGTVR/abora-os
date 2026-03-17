@@ -19,6 +19,11 @@ if ! command -v mkarchiso >/dev/null 2>&1; then
     exit 1
 fi
 
+if [ "$(id -u)" -ne 0 ]; then
+    echo "Run as root so mkarchiso and pacman-key can complete." >&2
+    exit 1
+fi
+
 if command -v pacman-key >/dev/null 2>&1; then
     if [ ! -s /etc/pacman.d/gnupg/pubring.kbx ]; then
         pacman-key --init
