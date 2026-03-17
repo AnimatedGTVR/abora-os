@@ -40,14 +40,34 @@ jobs:
           nix flake show --no-write-lock-file .
 
       - name: Build ISO
+        id: build_iso
+        continue-on-error: true
         env:
           NIX_CONFIG: experimental-features = nix-command flakes
-        run: ./scripts/build-iso.sh
+        run: |
+          set -o pipefail
+          ./scripts/build-iso.sh 2>&1 | tee /tmp/abora-build-iso.log
+
+      - name: Show Build Log Tail
+        if: always()
+        run: |
+          echo "=== build log tail ==="
+          tail -n 200 /tmp/abora-build-iso.log || true
 
       - name: Show output files
+        if: steps.build_iso.outcome == 'success'
         run: ls -lah out
 
+      - name: Upload Build Log Artifact
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: abora-build-log-${{ github.run_number }}
+          path: /tmp/abora-build-iso.log
+          if-no-files-found: warn
+
       - name: Upload ISO artifact
+        if: steps.build_iso.outcome == 'success'
         uses: actions/upload-artifact@v7
         with:
           name: abora-${{ steps.version.outputs.value }}-${{ github.run_number }}
@@ -55,3 +75,9 @@ jobs:
             out/*.iso
             out/SHA256SUMS-*.txt
           if-no-files-found: error
+
+      - name: Fail Build If ISO Step Failed
+        if: steps.build_iso.outcome != 'success'
+        run: |
+          echo "ISO build failed; see abora-build-log artifact."
+          exit 1
