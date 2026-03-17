@@ -41,9 +41,17 @@ if [[ ! -e "$build_link" ]]; then
     exit 1
 fi
 
-if [[ -f "$build_link" && "$build_link" == *.iso ]]; then
-    iso_src="$build_link"
-else
+iso_src=""
+if [[ -f "$build_link" ]]; then
+    resolved_link="$(readlink -f "$build_link" || true)"
+    if [[ -n "$resolved_link" && -f "$resolved_link" && "$resolved_link" == *.iso ]]; then
+        iso_src="$resolved_link"
+    elif [[ "$build_link" == *.iso ]]; then
+        iso_src="$build_link"
+    fi
+fi
+
+if [[ -z "${iso_src:-}" ]]; then
     iso_src="$(find -L "$build_link" -type f -name '*.iso' | head -n 1)"
 fi
 
