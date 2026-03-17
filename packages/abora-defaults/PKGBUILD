@@ -1,6 +1,6 @@
 pkgname=abora-defaults
 pkgver=0.1.0
-pkgrel=5
+pkgrel=6
 pkgdesc="Default configuration and first-boot experience for Abora OS"
 arch=('any')
 url="https://github.com/AnimatedGTVR/abora-os"
@@ -20,7 +20,7 @@ source=(
   '90-abora.preset'
 )
 sha256sums=(
-  'dd0a73d27309d0f19b7dd6ef29b68e4133ed8c16149ac11917aa8b58b0b34a72'
+  '9d1ae97ce074c43050f8226a7961889f4bf2b5ee23c0b404ef7b34bffa9882df'
   'dd4c2eab569c9a2f057308f32ee3c5b385d943d5e8cc9b7b432f37c01ee41e26'
   'f27192c4cdbb22bc4ab2c9033f656055dd0394f74a99dc231a3fa3bb796a1924'
   'f741395d7744c50f1f1261b4f80d699ed89ca77cb200edcb3c891f241c68ad0a'
