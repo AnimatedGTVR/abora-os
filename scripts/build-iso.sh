@@ -11,6 +11,8 @@ generated_pacman_conf="$generated_dir/pacman.conf"
 source_wallpaper="$repo_dir/assets/wallpaper.png"
 staged_wallpaper_dir="$profile_dir/airootfs/usr/share/wallpapers/Abora"
 staged_branding_dir="$profile_dir/airootfs/usr/share/abora"
+version_id="${ABORA_VERSION_ID:-}"
+build_date="$(date +%Y.%m.%d)"
 
 if ! command -v mkarchiso >/dev/null 2>&1; then
     echo "mkarchiso not found. Install the archiso package first." >&2
@@ -29,6 +31,20 @@ if [ ! -f "$source_wallpaper" ]; then
     exit 1
 fi
 
+if [ -z "$version_id" ] && [ -f "$repo_dir/VERSION" ]; then
+    version_id="$(tr -d '\n' < "$repo_dir/VERSION")"
+fi
+version_id="$(printf '%s' "$version_id" | tr -cd '[:alnum:]._-')"
+[ -n "$version_id" ] || version_id="dev"
+case "$version_id" in
+    [Vv]*)
+        version_tag="$version_id"
+        ;;
+    *)
+        version_tag="v$version_id"
+        ;;
+esac
+
 mkdir -p "$work_dir" "$out_dir"
 mkdir -p "$staged_wallpaper_dir" "$staged_branding_dir"
 mkdir -p "$generated_dir"
@@ -44,4 +60,16 @@ export ABORA_PACMAN_CONF="$generated_pacman_conf"
 sed "s#@ABORA_LOCAL_REPO@#$local_repo_dir#g" "$profile_dir/pacman.conf" > "$generated_pacman_conf"
 
 mkarchiso -v -w "$work_dir" -o "$out_dir" "$profile_dir"
+
+latest_iso="$(find "$out_dir" -maxdepth 1 -type f -name '*.iso' -printf '%T@ %p\n' | sort -nr | head -n 1 | cut -d' ' -f2-)"
+if [ -n "$latest_iso" ] && [ -f "$latest_iso" ]; then
+    iso_arch="$(basename "$latest_iso" | sed -E 's/^.*-([^-]+)\.iso$/\1/')"
+    [ -n "$iso_arch" ] || iso_arch="x86_64"
+    target_iso="$out_dir/abora-${build_date}-${iso_arch}-${version_tag}.iso"
+    if [ "$latest_iso" != "$target_iso" ]; then
+        mv -f "$latest_iso" "$target_iso"
+    fi
+    echo "ISO output: $target_iso"
+fi
+
 "$repo_dir/scripts/release-metadata.sh" >/dev/null
