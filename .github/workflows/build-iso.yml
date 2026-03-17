@@ -43,7 +43,7 @@ jobs:
           export PATH="$HOME/.nix-profile/bin:$PATH"
           which nix
           nix --version
-          nix flake show --no-write-lock-file .
+          nix flake show .
 
       - name: Build ISO
         id: build_iso
