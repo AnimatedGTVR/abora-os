@@ -27,14 +27,20 @@ jobs:
         id: version
         run: echo "value=$(tr -d '\n' < VERSION)" >> "$GITHUB_OUTPUT"
 
-      - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@v21
+      - name: Install Nix (official installer, no FlakeHub)
+        run: |
+          set -euxo pipefail
+          curl -fsSL https://nixos.org/nix/install -o /tmp/install-nix.sh
+          sh /tmp/install-nix.sh --no-daemon
+          echo "$HOME/.nix-profile/bin" >> "$GITHUB_PATH"
+          "$HOME/.nix-profile/bin/nix" --version
 
       - name: Verify Nix + Flake
         env:
           NIX_CONFIG: experimental-features = nix-command flakes
         run: |
           set -euxo pipefail
+          export PATH="$HOME/.nix-profile/bin:$PATH"
           which nix
           nix --version
           nix flake show --no-write-lock-file .
@@ -46,6 +52,7 @@ jobs:
           NIX_CONFIG: experimental-features = nix-command flakes
         run: |
           set -o pipefail
+          export PATH="$HOME/.nix-profile/bin:$PATH"
           ./scripts/build-iso.sh 2>&1 | tee /tmp/abora-build-iso.log
 
       - name: Show Build Log Tail
