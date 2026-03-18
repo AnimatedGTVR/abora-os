@@ -1,4 +1,4 @@
-{ pkgs, version, ... }:
+{ lib, pkgs, version, ... }:
 {
   imports = [
     ../modules/live-extensions.nix
@@ -28,5 +28,5 @@
 
   environment.etc."abora/default-wallpaper.png".source = ../../assets/wallpaper.png;
 
-  isoImage.isoName = "abora-${version}-x86_64.iso";
+  isoImage.isoName = lib.mkForce "abora-${version}-x86_64.iso";
 }
