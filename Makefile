@@ -19,7 +19,12 @@ iso:
 	fi
 
 qemu:
-	@echo "Running rebuild-vm.sh..."
-	@bash scripts/rebuild-vm.sh
+	@if command -v nix >/dev/null 2>&1; then \
+		echo "Running rebuild-vm.sh..."; \
+		bash scripts/rebuild-vm.sh; \
+	else \
+		echo "Nix required for VM rebuild. Install Nix with flakes and retry."; \
+		exit 1; \
+	fi
 
 qmec: qemu
