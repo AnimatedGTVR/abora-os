@@ -15,6 +15,7 @@
     curl
     wget
     htop
+    dialog  # For TUI installer
   ];
 
   environment.variables = {
@@ -27,17 +28,36 @@
   '';
 
   environment.etc."abora/default-wallpaper.png".source = ../../assets/wallpaper.png;
-  # Calamares removed; branding moved to boot/calamares
 
-  environment.etc."calamares/settings.conf".source = pkgs.runCommand "abora-calamares-settings.conf" {} ''
-    sed 's/^branding: nixos$/branding: abora/' \
-      ${pkgs.calamares-nixos-extensions}/share/calamares/settings.conf > "$out"
-  '';
-  environment.etc."calamares/branding/abora/branding.desc".source = ../../boot/calamares/branding/branding.desc;
-  environment.etc."calamares/branding/abora/show.qml".source = ../../boot/calamares/branding/show.qml;
-  environment.etc."calamares/branding/abora/abora-logo.png".source = ../../assets/abora-logo.png;
+  # Boot to console, not desktop
+  services.xserver.enable = false;
+
+  # Auto-login to installer user
+  services.getty.autologinUser = "installer";
+
+  users.users.installer = {
+    isNormalUser = true;
+    password = "";  # No password for auto-login
+    extraGroups = [ "wheel" ];
+  };
+
+  # Run installer on boot
+  systemd.services.abora-installer = {
+    description = "Abora Custom Installer";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network.target" ];
+    serviceConfig = {
+      Type = "oneshot";
+      User = "installer";
+      ExecStart = "${pkgs.bash}/bin/bash /etc/abora/installer.sh";
+      RemainAfterExit = true;
+    };
+  };
+
+  # Copy installer script
+  environment.etc."abora/installer.sh".source = ../../scripts/abora-installer.sh;
+  environment.etc."abora/installer.sh".mode = "0755";
 
   isoImage.isoName = lib.mkForce "abora-${version}-x86_64.iso";
-
-  # Calamares branding moved to boot/calamares
+  isoImage.appendToMenuLabel = " Installer";
 }

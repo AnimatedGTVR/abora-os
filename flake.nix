@@ -14,7 +14,7 @@
         inherit system;
         specialArgs = { inherit version; };
         modules = [
-          (nixpkgs.outPath + "/nixos/modules/installer/cd-dvd/installation-cd-graphical-calamares-gnome.nix")
+          (nixpkgs.outPath + "/nixos/modules/installer/cd-dvd/iso-image.nix")
           ./nix/profiles/live.nix
         ];
       };
