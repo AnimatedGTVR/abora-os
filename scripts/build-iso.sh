@@ -44,7 +44,7 @@ fi
 iso_src=""
 if [[ -f "$build_link" ]]; then
     resolved_link="$(readlink -f "$build_link" || true)"
-    if [[ -n "$resolved_link" && -f "$resolved_link" && "$resolved_link" == *.iso ]]; then
+    if [[ -n "$resolved_link" && -f "$resolved_link" ]]; then
         iso_src="$resolved_link"
     elif [[ "$build_link" == *.iso ]]; then
         iso_src="$build_link"
