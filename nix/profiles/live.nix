@@ -47,6 +47,7 @@
 
   environment.etc."abora/default-wallpaper.png".source = ../../assets/wallpaper.png;
   environment.etc."abora/title.txt".source = ../../assets/abora-title.txt;
+  environment.etc."abora/fastfetch-logo.txt".source = ../../assets/fastfetch-logo.txt;
   environment.etc."abora/fastfetch-config.jsonc".source = ../../assets/fastfetch-config.jsonc;
   environment.etc."abora/nixpkgs".source = pkgs.path;
   environment.etc."abora/lonis/hyprland.conf".source = ../../assets/lonis/hyprland.conf;

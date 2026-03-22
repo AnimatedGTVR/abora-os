@@ -928,6 +928,7 @@ EOF
 write_branding_assets() {
     mkdir -p /mnt/etc/nixos/abora
     cp "$title_file" /mnt/etc/nixos/abora/title.txt
+    cp /etc/abora/fastfetch-logo.txt /mnt/etc/nixos/abora/fastfetch-logo.txt
     cp /etc/abora/fastfetch-config.jsonc /mnt/etc/nixos/abora/fastfetch-config.jsonc
 }
 
@@ -999,6 +1000,7 @@ generate_config() {
   security.polkit.enable = true;
   services.udisks2.enable = true;
   environment.etc."abora/title.txt".source = ./abora/title.txt;
+  environment.etc."abora/fastfetch-logo.txt".source = ./abora/fastfetch-logo.txt;
   environment.etc."xdg/fastfetch/config.jsonc".source = ./abora/fastfetch-config.jsonc;
   environment.etc."skel/.config/fastfetch/config.jsonc".source = ./abora/fastfetch-config.jsonc;
   environment.etc."issue".text = ''
