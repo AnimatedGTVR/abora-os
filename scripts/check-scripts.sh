@@ -8,8 +8,10 @@ bash_scripts=(
   "scripts/abora-boot.sh"
   "scripts/abora-installer.sh"
   "scripts/build-iso.sh"
+  "scripts/build-iso-local.sh"
   "scripts/rebuild-vm.sh"
   "scripts/release-metadata.sh"
+  "scripts/run-qemu.sh"
   "scripts/check-scripts.sh"
 )
 

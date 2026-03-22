@@ -1,30 +1,27 @@
-SHELL := /usr/bin/env bash
-
-.PHONY: help iso qemu qmec
+.PHONY: help iso iso-local qemu qmec qemc check
 
 help:
 	@echo "Usage: make <target>"
 	@echo "Targets:"
-	@echo "  iso    - Build the ISO image using scripts/build-iso.sh"
-	@echo "  qemu   - Rebuild VM/launch QEMU via scripts/rebuild-vm.sh"
-	@echo "  qmec   - Alias for 'qemu' (accepts your spelling)"
+	@echo "  iso       - Build the real Nix ISO"
+	@echo "  iso-local - Build a minimal local ISO without Nix"
+	@echo "  qemu      - Boot the latest ISO in QEMU"
+	@echo "  qmec      - Alias for qemu"
+	@echo "  qemc      - Alias for qemu"
+	@echo "  check     - Run repository script checks"
 
 iso:
-	@if command -v nix >/dev/null 2>&1; then \
-		echo "Running build-iso.sh..."; \
-		bash scripts/build-iso.sh; \
-	else \
-		echo "Nix not found — using local ISO fallback (requires xorriso/genisoimage/mkisofs)..."; \
-		bash scripts/build-iso-local.sh; \
-	fi
+	./scripts/build-iso.sh
+
+iso-local:
+	./scripts/build-iso-local.sh
 
 qemu:
-	@if command -v nix >/dev/null 2>&1; then \
-		echo "Running rebuild-vm.sh..."; \
-		bash scripts/rebuild-vm.sh; \
-	else \
-		echo "Nix required for VM rebuild. Install Nix with flakes and retry."; \
-		exit 1; \
-	fi
+	./scripts/run-qemu.sh
 
 qmec: qemu
+
+qemc: qemu
+
+check:
+	./scripts/check-scripts.sh

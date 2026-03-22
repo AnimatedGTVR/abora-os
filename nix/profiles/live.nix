@@ -38,7 +38,7 @@
   environment.shellAliases.fastfetch = "fastfetch --logo-type file-raw --logo /etc/abora/fastfetch-logo.txt";
 
   environment.etc."profile.d/abora-live.sh".text = ''
-    if [ "$USER" = "root" ] && [ "$(tty 2>/dev/null)" = "/dev/tty1" ] && [ -z "${ABORA_BOOT_MENU:-}" ]; then
+    if [ "$USER" = "root" ] && [ "$(tty 2>/dev/null)" = "/dev/tty1" ] && [ -z "''${ABORA_BOOT_MENU:-}" ]; then
       export ABORA_BOOT_MENU=1
       exec /etc/abora/boot.sh
     fi

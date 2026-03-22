@@ -28,13 +28,8 @@ Or on Fedora:
   sudo dnf install -y xorriso
 
 Or install Nix (preferred) and run `make iso` to use the reproducible Nix build.
-
-For now, creating a dummy ISO file...
 EOF
-  out_iso="$out_dir/abora-${build_date}-local.iso"
-  echo "Dummy Abora OS ISO" > "$out_iso"
-  echo "Dummy ISO created: $out_iso"
-  exit 0
+  exit 1
 fi
 
 tmpdir="$(mktemp -d)"
@@ -60,3 +55,4 @@ case "$iso_tool" in
 esac
 
 echo "Local ISO created: $out_iso"
+ABORA_OUT_DIR="$out_dir" "$repo_dir/scripts/release-metadata.sh" >/dev/null
