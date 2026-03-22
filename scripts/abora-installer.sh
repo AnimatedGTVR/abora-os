@@ -318,7 +318,16 @@ prompt_password() {
             continue
         fi
 
-        user_password_hash="$(mkpasswd -m yescrypt "$first")"
+        if command -v mkpasswd >/dev/null 2>&1; then
+            user_password_hash="$(mkpasswd -m yescrypt "$first")"
+        elif command -v openssl >/dev/null 2>&1; then
+            user_password_hash="$(printf '%s' "$first" | openssl passwd -6 -stdin)"
+        else
+            error_msg "A password hashing tool is missing. Install mkpasswd or openssl."
+            pause_prompt
+            continue
+        fi
+
         unset first second
         return
     done
@@ -525,10 +534,10 @@ finish_screen() {
 
 main() {
     require_root
-    command -v mkpasswd >/dev/null 2>&1 || {
-        error_msg "mkpasswd is required but missing."
+    if ! command -v mkpasswd >/dev/null 2>&1 && ! command -v openssl >/dev/null 2>&1; then
+        error_msg "Password hashing is unavailable. Install mkpasswd or openssl."
         exit 1
-    }
+    fi
 
     pick_keyboard_layout
     pick_desktop_environment

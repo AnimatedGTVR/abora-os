@@ -16,6 +16,7 @@
     htop
     iproute2
     kbd
+    openssl
     parted
     util-linux
     whois
