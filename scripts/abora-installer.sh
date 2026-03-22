@@ -975,8 +975,8 @@ generate_config() {
 { config, pkgs, ... }:
 let
   aboraPlymouthTheme = pkgs.runCommandLocal "abora-plymouth-theme" {} ''
-    install -Dm0644 \${./abora/plymouth/abora.plymouth} \${out}/share/plymouth/themes/abora/abora.plymouth
-    install -Dm0644 \${./abora/plymouth/abora.script} \${out}/share/plymouth/themes/abora/abora.script
+    install -Dm0644 \${./abora/plymouth/abora.plymouth} \$out/share/plymouth/themes/abora/abora.plymouth
+    install -Dm0644 \${./abora/plymouth/abora.script} \$out/share/plymouth/themes/abora/abora.script
   '';
 in
 {
