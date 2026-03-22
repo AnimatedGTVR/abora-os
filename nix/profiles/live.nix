@@ -102,5 +102,36 @@
   };
 
   isoImage.isoName = lib.mkForce "abora-${version}-x86_64.iso";
+  isoImage.splashImage = ../../assets/bootloader/abora-bios.png;
+  isoImage.efiSplashImage = ../../assets/bootloader/abora-efi.png;
+  isoImage.grubTheme = null;
+  isoImage.syslinuxTheme = ''
+    MENU TITLE Boot Options
+    MENU RESOLUTION 800 600
+    MENU ROWS 6
+    MENU WIDTH 48
+    MENU MARGIN 0
+    MENU VSHIFT 11
+    MENU HSHIFT 2
+    MENU TABMSGROW 23
+    MENU CMDLINEROW 24
+    MENU HELPMSGROW 26
+    MENU HELPMSGENDROW 29
+    MENU TIMEOUTROW 28
+
+    MENU COLOR BORDER       30;44      #00000000    #00000000   none
+    MENU COLOR SCREEN       37;40      #FF000000    #00000000   none
+    MENU COLOR TABMSG       1;37;40    #FFB6C9DF    #00000000   none
+    MENU COLOR TIMEOUT      1;37;40    #FFF3FAFF    #00000000   none
+    MENU COLOR TIMEOUT_MSG  37;40      #FFB6C9DF    #00000000   none
+    MENU COLOR CMDMARK      1;36;40    #FF35C8FF    #00000000   none
+    MENU COLOR CMDLINE      37;40      #FFE7F4FF    #00000000   none
+    MENU COLOR TITLE        1;36;44    #FF8DF5FF    #00000000   none
+    MENU COLOR UNSEL        37;44      #FFEAF5FF    #00000000   none
+    MENU COLOR SEL          7;37;40    #FF07101A    #FF35C8FF   std
+    MENU COLOR HOTKEY       1;37;40    #FFF3FAFF    #00000000   none
+    MENU COLOR HOTSEL       1;37;40    #FF07101A    #FF35C8FF   std
+    MENU COLOR SCROLLBAR    30;44      #00000000    #00000000   none
+  '';
   isoImage.appendToMenuLabel = " Live";
 }
