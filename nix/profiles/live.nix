@@ -34,21 +34,35 @@
   environment.etc."abora/title.txt".source = ../../assets/abora-title.txt;
 
   services.xserver.enable = false;
-  services.getty.autologinUser = "root";
-
   environment.shellAliases.fastfetch = "fastfetch --logo-type file-raw --logo /etc/abora/title.txt";
-
-  environment.etc."profile.d/abora-live.sh".text = ''
-    if [ "$USER" = "root" ] && [ "$(tty 2>/dev/null)" = "/dev/tty1" ] && [ -z "''${ABORA_BOOT_MENU:-}" ]; then
-      export ABORA_BOOT_MENU=1
-      exec /etc/abora/boot.sh
-    fi
-  '';
 
   environment.etc."abora/boot.sh".source = ../../scripts/abora-boot.sh;
   environment.etc."abora/boot.sh".mode = "0755";
   environment.etc."abora/installer.sh".source = ../../scripts/abora-installer.sh;
   environment.etc."abora/installer.sh".mode = "0755";
+
+  systemd.services."getty@tty1".enable = lib.mkForce false;
+  systemd.services.abora-boot = {
+    description = "Abora live boot menu";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "systemd-user-sessions.service" ];
+    conflicts = [ "getty@tty1.service" ];
+    before = [ "getty@tty1.service" ];
+
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "${pkgs.bashInteractive}/bin/bash /etc/abora/boot.sh";
+      Restart = "always";
+      RestartSec = "0";
+      StandardInput = "tty-force";
+      StandardOutput = "tty";
+      StandardError = "tty";
+      TTYPath = "/dev/tty1";
+      TTYReset = true;
+      TTYVHangup = true;
+      TTYVTDisallocate = true;
+    };
+  };
 
   isoImage.isoName = lib.mkForce "abora-${version}-x86_64.iso";
   isoImage.appendToMenuLabel = " Live";
