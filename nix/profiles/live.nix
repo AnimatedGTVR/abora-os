@@ -15,6 +15,7 @@
     wget
     htop
     iproute2
+    kbd
     parted
     util-linux
     whois

@@ -5,9 +5,22 @@ disk=""
 hostname_value="abora"
 username_value="abora"
 timezone_value="UTC"
+keyboard_value="us"
 user_password_hash=""
 efi_part=""
 root_part=""
+
+logo_file="/etc/abora/fastfetch-logo.txt"
+
+BLUE='\033[38;5;33m'
+MAGENTA='\033[38;5;207m'
+WHITE='\033[1;37m'
+DIM='\033[38;5;245m'
+GREEN='\033[38;5;84m'
+RED='\033[38;5;203m'
+NC='\033[0m'
+menu_result=""
+prompt_result=""
 
 clear_screen() {
     clear || printf '\033c'
@@ -16,31 +29,111 @@ clear_screen() {
 show_header() {
     clear_screen
 
-    if [[ -f /etc/abora/fastfetch-logo.txt ]]; then
-        cat /etc/abora/fastfetch-logo.txt
+    if [[ -f "$logo_file" ]]; then
+        printf '%b' "$WHITE"
+        cat "$logo_file"
+        printf '%b' "$NC"
     fi
 
     printf '\n'
-    printf 'Abora OS Installer\n'
-    printf 'Minimal boot-first install flow\n'
+    printf '%bAbora OS installer%b\n' "$WHITE" "$NC"
+    printf '%bLet'\''s set up your machine...%b\n' "$DIM" "$NC"
     printf '\n'
 }
 
 info() {
-    printf '[*] %s\n' "$1"
+    printf '%b[*] %s%b\n' "$BLUE" "$1" "$NC"
 }
 
 success() {
-    printf '[ok] %s\n' "$1"
+    printf '%b[ok] %s%b\n' "$GREEN" "$1" "$NC"
 }
 
 error_msg() {
-    printf '[x] %s\n' "$1" >&2
+    printf '%b[x] %s%b\n' "$RED" "$1" "$NC" >&2
 }
 
 pause_prompt() {
     printf '\n'
     read -r -p "Press ENTER to continue..."
+}
+
+read_key() {
+    local key=""
+    IFS= read -rsn1 key || true
+    if [[ "$key" == $'\033' ]]; then
+        local rest=""
+        IFS= read -rsn2 -t 0.05 rest || true
+        key+="$rest"
+    fi
+    printf '%s' "$key"
+}
+
+menu_choose() {
+    local prompt="$1"
+    shift
+    local options=("$@")
+    local selected=0
+    local key=""
+    local i=""
+
+    while true; do
+        show_header
+        printf '%b%s%b\n' "$BLUE" "$prompt" "$NC"
+        printf '\n'
+
+        for i in "${!options[@]}"; do
+            if [[ "$i" -eq "$selected" ]]; then
+                printf '%b› %s%b\n' "$MAGENTA" "${options[$i]}" "$NC"
+            else
+                printf '  %s\n' "${options[$i]}"
+            fi
+        done
+
+        printf '\n'
+        printf '%b<↑↓> navigate • enter submit%b\n' "$DIM" "$NC"
+
+        key="$(read_key)"
+        case "$key" in
+            $'\033[A')
+                if [[ "$selected" -gt 0 ]]; then
+                    selected=$((selected - 1))
+                else
+                    selected=$((${#options[@]} - 1))
+                fi
+                ;;
+            $'\033[B')
+                if [[ "$selected" -lt $((${#options[@]} - 1)) ]]; then
+                    selected=$((selected + 1))
+                else
+                    selected=0
+                fi
+                ;;
+            "")
+                menu_result="$selected"
+                return 0
+                ;;
+        esac
+    done
+}
+
+prompt_input() {
+    local prompt="$1"
+    local default_value="${2:-}"
+    local input=""
+
+    while true; do
+        show_header
+        printf '%b%s%b\n\n' "$BLUE" "$prompt" "$NC"
+        if [[ -n "$default_value" ]]; then
+            read -r -p "> [${default_value}] " input
+            prompt_result="${input:-$default_value}"
+        else
+            read -r -p "> " input
+            prompt_result="$input"
+        fi
+        return 0
+    done
 }
 
 require_root() {
@@ -50,44 +143,64 @@ require_root() {
     fi
 }
 
-list_disks() {
-    lsblk -d -e 7,11 -o NAME,SIZE,MODEL,TYPE | awk '$4 == "disk" { printf "  /dev/%s  %s  %s\n", $1, $2, substr($0, index($0, $3)) }'
+load_keyboard_layout() {
+    if command -v loadkeys >/dev/null 2>&1; then
+        loadkeys "$keyboard_value" >/dev/null 2>&1 || true
+    fi
+}
+
+pick_keyboard_layout() {
+    local labels=(
+        "English (US)"
+        "English (UK)"
+        "German"
+        "French"
+        "Spanish"
+    )
+    local values=( "us" "uk" "de" "fr" "es" )
+    local choice=""
+
+    menu_choose "Select keyboard layout" "${labels[@]}"
+    keyboard_value="${values[$menu_result]}"
+    load_keyboard_layout
+}
+
+collect_disks() {
+    lsblk -d -e 7,11 -o NAME,SIZE,MODEL,TYPE | awk '$4 == "disk" { print $1 "|" $2 "|" substr($0, index($0, $3)) }'
 }
 
 prompt_disk() {
-    local input=""
+    local entries=()
+    local labels=()
+    local paths=()
+    local choice=""
+    local name=""
+    local size=""
+    local model=""
+    local entry=""
 
-    while true; do
-        show_header
-        info "Available disks"
-        printf '\n'
-        list_disks
-        printf '\n'
-        read -r -p "Install target disk (example: sda or /dev/nvme0n1): " input
-        [[ -n "$input" ]] || continue
+    mapfile -t entries < <(collect_disks)
+    if [[ "${#entries[@]}" -eq 0 ]]; then
+        error_msg "No installable disks were found."
+        exit 1
+    fi
 
-        if [[ "$input" != /dev/* ]]; then
-            input="/dev/$input"
-        fi
-
-        if [[ -b "$input" ]]; then
-            disk="$input"
-            return
-        fi
-
-        error_msg "Disk not found: $input"
-        pause_prompt
+    for entry in "${entries[@]}"; do
+        IFS='|' read -r name size model <<<"$entry"
+        labels+=( "/dev/${name}  ${size}  ${model}" )
+        paths+=( "/dev/${name}" )
     done
+
+    menu_choose "Select install target" "${labels[@]}"
+    disk="${paths[$menu_result]}"
 }
 
 prompt_hostname() {
     local input=""
 
     while true; do
-        show_header
-        read -r -p "Hostname [${hostname_value}]: " input
-        input="${input:-$hostname_value}"
-
+        prompt_input "Choose a hostname" "$hostname_value"
+        input="$prompt_result"
         if [[ "$input" =~ ^[a-zA-Z0-9][a-zA-Z0-9-]*$ ]]; then
             hostname_value="$input"
             return
@@ -102,10 +215,8 @@ prompt_username() {
     local input=""
 
     while true; do
-        show_header
-        read -r -p "Username [${username_value}]: " input
-        input="${input:-$username_value}"
-
+        prompt_input "Choose a username" "$username_value"
+        input="$prompt_result"
         if [[ "$input" =~ ^[a-z_][a-z0-9_-]*$ ]]; then
             username_value="$input"
             return
@@ -118,17 +229,9 @@ prompt_username() {
 
 prompt_timezone() {
     local input=""
-
-    while true; do
-        show_header
-        read -r -p "Timezone [${timezone_value}]: " input
-        input="${input:-$timezone_value}"
-
-        if [[ -n "$input" ]]; then
-            timezone_value="$input"
-            return
-        fi
-    done
+    prompt_input "Choose a timezone" "$timezone_value"
+    input="$prompt_result"
+    timezone_value="${input:-$timezone_value}"
 }
 
 prompt_password() {
@@ -137,7 +240,7 @@ prompt_password() {
 
     while true; do
         show_header
-        printf 'Set password for %s\n\n' "$username_value"
+        printf '%bSet password for %s%b\n\n' "$BLUE" "$username_value" "$NC"
 
         read -r -s -p "Password: " first
         printf '\n'
@@ -163,11 +266,12 @@ prompt_password() {
 }
 
 confirm_install() {
-    local input=""
+    local choice=""
 
     show_header
-    printf 'Install summary\n\n'
+    printf '%bInstall summary%b\n\n' "$BLUE" "$NC"
     printf '  Disk:      %s\n' "$disk"
+    printf '  Keyboard:  %s\n' "$keyboard_value"
     printf '  Hostname:  %s\n' "$hostname_value"
     printf '  User:      %s\n' "$username_value"
     printf '  Timezone:  %s\n' "$timezone_value"
@@ -177,8 +281,9 @@ confirm_install() {
     printf '  - 512 MiB EFI system partition\n'
     printf '  - ext4 root partition using the rest of the disk\n'
     printf '\n'
-    read -r -p "Type WIPE to continue, or anything else to cancel: " input
-    [[ "$input" == "WIPE" ]]
+
+    menu_choose "Continue with installation?" "Install now" "Cancel"
+    [[ "$menu_result" == "0" ]]
 }
 
 disk_part_suffix() {
@@ -240,13 +345,14 @@ generate_config() {
     efiSupport = true;
     efiInstallAsRemovable = true;
   };
-  boot.loader.efi.canTouchEfiVariables = true;
+  boot.loader.efi.canTouchEfiVariables = false;
 
   networking.hostName = "${hostname_value}";
   networking.networkmanager.enable = true;
 
   time.timeZone = "${timezone_value}";
   i18n.defaultLocale = "en_US.UTF-8";
+  console.keyMap = "${keyboard_value}";
 
   users.users."${username_value}" = {
     isNormalUser = true;
@@ -275,7 +381,10 @@ EOF
 
 install_system() {
     info "Installing Abora OS"
-    nixos-install --root /mnt --no-root-passwd
+    if ! nixos-install --root /mnt --no-root-passwd; then
+        error_msg "Installation failed. Review the output above."
+        return 1
+    fi
     success "Installation complete"
 }
 
@@ -283,7 +392,7 @@ finish_screen() {
     show_header
     success "Abora OS is installed."
     printf '\n'
-    printf 'What to do next:\n'
+    printf 'Next:\n'
     printf '  1. Remove the ISO from the VM or USB boot order.\n'
     printf '  2. Reboot the machine.\n'
     printf '\n'
@@ -297,6 +406,7 @@ main() {
         exit 1
     }
 
+    pick_keyboard_layout
     prompt_disk
     prompt_hostname
     prompt_username
@@ -312,7 +422,10 @@ main() {
     partition_disk
     mount_target
     generate_config
-    install_system
+    install_system || {
+        pause_prompt
+        return 1
+    }
     finish_screen
 }
 

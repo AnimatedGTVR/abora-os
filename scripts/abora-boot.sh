@@ -3,6 +3,13 @@ set -euo pipefail
 
 logo_file="/etc/abora/fastfetch-logo.txt"
 
+BLUE='\033[38;5;33m'
+MAGENTA='\033[38;5;207m'
+WHITE='\033[1;37m'
+DIM='\033[38;5;245m'
+NC='\033[0m'
+menu_result=""
+
 clear_screen() {
     clear || printf '\033c'
 }
@@ -10,22 +17,75 @@ clear_screen() {
 show_header() {
     clear_screen
 
-    if command -v fastfetch >/dev/null 2>&1; then
-        fastfetch \
-            --logo-type file-raw \
-            --logo "$logo_file" \
-            --structure Title:Separator:OS:Kernel:Uptime:Memory:Disk:LocalIP \
-            --separator "  "
-    elif [[ -f "$logo_file" ]]; then
+    if [[ -f "$logo_file" ]]; then
+        printf '%b' "$WHITE"
         cat "$logo_file"
-        printf '\n'
-        printf 'Abora OS %s\n' "${ABORA_VERSION:-live}"
+        printf '%b' "$NC"
     fi
 
     printf '\n'
-    printf 'Abora Live Boot\n'
-    printf 'Simple live installer and recovery shell\n'
+    printf '%bAbora live boot%b\n' "$WHITE" "$NC"
+    printf '%bLet'\''s set up your machine...%b\n' "$DIM" "$NC"
     printf '\n'
+}
+
+read_key() {
+    local key=""
+    IFS= read -rsn1 key || true
+    if [[ "$key" == $'\033' ]]; then
+        local rest=""
+        IFS= read -rsn2 -t 0.05 rest || true
+        key+="$rest"
+    fi
+    printf '%s' "$key"
+}
+
+menu_choose() {
+    local prompt="$1"
+    shift
+    local options=("$@")
+    local selected=0
+    local key=""
+    local i=""
+
+    while true; do
+        show_header
+        printf '%b%s%b\n' "$BLUE" "$prompt" "$NC"
+        printf '\n'
+
+        for i in "${!options[@]}"; do
+            if [[ "$i" -eq "$selected" ]]; then
+                printf '%b› %s%b\n' "$MAGENTA" "${options[$i]}" "$NC"
+            else
+                printf '  %s\n' "${options[$i]}"
+            fi
+        done
+
+        printf '\n'
+        printf '%b<↑↓> navigate • enter submit%b\n' "$DIM" "$NC"
+
+        key="$(read_key)"
+        case "$key" in
+            $'\033[A')
+                if [[ "$selected" -gt 0 ]]; then
+                    selected=$((selected - 1))
+                else
+                    selected=$((${#options[@]} - 1))
+                fi
+                ;;
+            $'\033[B')
+                if [[ "$selected" -lt $((${#options[@]} - 1)) ]]; then
+                    selected=$((selected + 1))
+                else
+                    selected=0
+                fi
+                ;;
+            "")
+                menu_result="$selected"
+                return 0
+                ;;
+        esac
+    done
 }
 
 pause_prompt() {
@@ -34,36 +94,39 @@ pause_prompt() {
 }
 
 open_shell() {
-    printf '\nOpening live shell. Type `exit` to return to the boot menu.\n\n'
-    ABORA_BOOT_MENU=1 exec bash --login
+    clear_screen
+    printf '%bOpening live shell%b\n' "$WHITE" "$NC"
+    printf '%bType `exit` to return to the boot menu.%b\n\n' "$DIM" "$NC"
+    ABORA_BOOT_MENU=1 bash --login
 }
 
-while true; do
-    show_header
-    printf '[1] Install Abora OS\n'
-    printf '[2] Open live shell\n'
-    printf '[3] Reboot\n'
-    printf '[4] Power off\n'
-    printf '\n'
+boot_menu() {
+    local choice=""
 
-    read -r -p "Select an option [1-4]: " choice
+    while true; do
+        menu_choose \
+            "Select an action" \
+            "Install Abora OS" \
+            "Open live shell" \
+            "Reboot" \
+            "Power off"
+        choice="$menu_result"
 
-    case "$choice" in
-        1)
-            /etc/abora/installer.sh || pause_prompt
-            ;;
-        2)
-            open_shell
-            ;;
-        3)
-            reboot
-            ;;
-        4)
-            poweroff
-            ;;
-        *)
-            printf '\nUnknown option: %s\n' "${choice:-<empty>}"
-            pause_prompt
-            ;;
-    esac
-done
+        case "$choice" in
+            0)
+                /etc/abora/installer.sh || pause_prompt
+                ;;
+            1)
+                open_shell
+                ;;
+            2)
+                reboot
+                ;;
+            3)
+                poweroff
+                ;;
+        esac
+    done
+}
+
+boot_menu
