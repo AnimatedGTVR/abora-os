@@ -949,7 +949,8 @@ generate_config() {
 
     info "Generating NixOS configuration"
     info "Writing configuration log to ${config_log}"
-    if ! nixos-generate-config --root /mnt >"$config_log" 2>&1; then
+    printf '[*] Running nixos-generate-config --root /mnt\n' > "$config_log"
+    if ! nixos-generate-config --root /mnt >>"$config_log" 2>&1; then
         show_failure_screen \
             "Configuration failed" \
             "Abora could not generate the base NixOS hardware config." \
@@ -1038,6 +1039,7 @@ EOF
 install_system() {
     local nixpkgs_path=""
     local nix_path=""
+    local status=0
 
     info "Installing Abora OS"
     info "This can take a few minutes."
@@ -1046,23 +1048,28 @@ install_system() {
         return 1
     }
     nix_path="nixpkgs=${nixpkgs_path}:nixos-config=/mnt/etc/nixos/configuration.nix"
-    : > "$install_log"
     info "Writing install log to ${install_log}"
+    printf '[*] Running nixos-install\n' > "$install_log"
+    printf '[*] NIX_PATH=%s\n' "$nix_path" >> "$install_log"
 
-    if ! NIX_PATH="$nix_path" nixos-install \
+    if NIX_PATH="$nix_path" nixos-install \
         --root /mnt \
         --no-root-passwd \
         -I "nixpkgs=${nixpkgs_path}" \
-        -I "nixos-config=/mnt/etc/nixos/configuration.nix"
-        >"$install_log" 2>&1
+        -I "nixos-config=/mnt/etc/nixos/configuration.nix" \
+        >>"$install_log" 2>&1
     then
+        success "Installation complete"
+        return 0
+    else
+        status="$?"
+        printf '\n[x] nixos-install exited with status %s\n' "$status" >> "$install_log"
         show_failure_screen \
             "Installation failed" \
             "Abora could not finish writing the system." \
             "$install_log"
         return 1
     fi
-    success "Installation complete"
 }
 
 finish_screen() {
