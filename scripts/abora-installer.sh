@@ -7,6 +7,8 @@ username_value="abora"
 timezone_value="UTC"
 keyboard_value="us"
 xkb_layout_value="us"
+desktop_profile="gnome"
+desktop_label="GNOME"
 user_password_hash=""
 efi_part=""
 root_part=""
@@ -168,6 +170,20 @@ sync_xkb_layout() {
     esac
 }
 
+sync_desktop_label() {
+    case "$desktop_profile" in
+        gnome)
+            desktop_label="GNOME"
+            ;;
+        plasma)
+            desktop_label="KDE Plasma"
+            ;;
+        hyprland)
+            desktop_label="Hyprland"
+            ;;
+    esac
+}
+
 pick_keyboard_layout() {
     local labels=(
         "English (US)"
@@ -183,6 +199,19 @@ pick_keyboard_layout() {
     keyboard_value="${values[$menu_result]}"
     sync_xkb_layout
     load_keyboard_layout
+}
+
+pick_desktop_environment() {
+    local labels=(
+        "GNOME - polished and simple"
+        "KDE Plasma - flexible and full featured"
+        "Hyprland - tiling Wayland desktop"
+    )
+    local values=( "gnome" "plasma" "hyprland" )
+
+    menu_choose "Select desktop environment" "${labels[@]}"
+    desktop_profile="${values[$menu_result]}"
+    sync_desktop_label
 }
 
 collect_disks() {
@@ -299,6 +328,7 @@ confirm_install() {
     show_header "Ready to install" "Review your choices before the disk is wiped."
     printf '  Disk:      %s\n' "$disk"
     printf '  Keyboard:  %s\n' "$keyboard_value"
+    printf '  Desktop:   %s\n' "$desktop_label"
     printf '  Hostname:  %s\n' "$hostname_value"
     printf '  User:      %s\n' "$username_value"
     printf '  Timezone:  %s\n' "$timezone_value"
@@ -357,9 +387,68 @@ mount_target() {
     success "Target mounted at /mnt"
 }
 
+desktop_config_block() {
+    case "$desktop_profile" in
+        gnome)
+            cat <<EOF
+  services.xserver = {
+    enable = true;
+    xkb.layout = "${xkb_layout_value}";
+    displayManager.gdm.enable = true;
+    desktopManager.gnome.enable = true;
+  };
+  services.displayManager.autoLogin.enable = true;
+  services.displayManager.autoLogin.user = "${username_value}";
+  services.gnome.gnome-keyring.enable = true;
+EOF
+            ;;
+        plasma)
+            cat <<EOF
+  services.xserver = {
+    enable = true;
+    xkb.layout = "${xkb_layout_value}";
+  };
+  services.displayManager = {
+    defaultSession = "plasma";
+    autoLogin.enable = true;
+    autoLogin.user = "${username_value}";
+  };
+  services.displayManager.sddm.enable = true;
+  services.desktopManager.plasma6.enable = true;
+EOF
+            ;;
+        hyprland)
+            cat <<EOF
+  services.xserver = {
+    enable = true;
+    xkb.layout = "${xkb_layout_value}";
+  };
+  services.displayManager = {
+    defaultSession = "hyprland";
+    autoLogin.enable = true;
+    autoLogin.user = "${username_value}";
+  };
+  services.displayManager.sddm = {
+    enable = true;
+    wayland.enable = true;
+  };
+  programs.hyprland = {
+    enable = true;
+    withUWSM = true;
+    xwayland.enable = true;
+  };
+  xdg.portal.enable = true;
+  xdg.portal.extraPortals = [ pkgs.xdg-desktop-portal-gtk ];
+EOF
+            ;;
+    esac
+}
+
 generate_config() {
     info "Generating NixOS configuration"
     nixos-generate-config --root /mnt >/dev/null
+
+    desktop_block="$(desktop_config_block)"
 
     cat > /mnt/etc/nixos/configuration.nix <<EOF
 { config, pkgs, ... }:
@@ -380,15 +469,7 @@ generate_config() {
   time.timeZone = "${timezone_value}";
   i18n.defaultLocale = "en_US.UTF-8";
   console.keyMap = "${keyboard_value}";
-  services.xserver = {
-    enable = true;
-    xkb.layout = "${xkb_layout_value}";
-    displayManager.gdm.enable = true;
-    desktopManager.gnome.enable = true;
-  };
-  services.displayManager.autoLogin.enable = true;
-  services.displayManager.autoLogin.user = "${username_value}";
-  services.gnome.gnome-keyring.enable = true;
+${desktop_block}
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -450,6 +531,7 @@ main() {
     }
 
     pick_keyboard_layout
+    pick_desktop_environment
     prompt_disk || return 1
     prompt_hostname
     prompt_username
