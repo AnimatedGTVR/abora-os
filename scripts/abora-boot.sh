@@ -10,6 +10,21 @@ DIM='\033[38;5;245m'
 NC='\033[0m'
 menu_result=""
 
+bash_bin() {
+    local candidate=""
+
+    for candidate in "${BASH:-}" /run/current-system/sw/bin/bash /usr/bin/bash /bin/bash; do
+        if [[ -n "$candidate" && -x "$candidate" ]]; then
+            printf '%s' "$candidate"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+BASH_BIN="$(bash_bin)"
+
 clear_screen() {
     clear || printf '\033c'
 }
@@ -110,7 +125,7 @@ autoboot_installer() {
 
     IFS= read -rsn1 -t 3 key || true
     if [[ -z "$key" ]]; then
-        /etc/abora/installer.sh || pause_prompt
+        "$BASH_BIN" /etc/abora/installer.sh || pause_prompt
     fi
 }
 
@@ -118,7 +133,7 @@ open_shell() {
     clear_screen
     printf '%bOpening live shell%b\n' "$WHITE" "$NC"
     printf '%bType `exit` to return to the boot menu.%b\n\n' "$DIM" "$NC"
-    ABORA_BOOT_MENU=1 bash --login
+    ABORA_BOOT_MENU=1 "$BASH_BIN" --login
 }
 
 boot_menu() {
@@ -137,7 +152,7 @@ boot_menu() {
 
         case "$choice" in
             0)
-                /etc/abora/installer.sh || pause_prompt
+                "$BASH_BIN" /etc/abora/installer.sh || pause_prompt
                 ;;
             1)
                 open_shell
