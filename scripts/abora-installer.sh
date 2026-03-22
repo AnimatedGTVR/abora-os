@@ -721,7 +721,7 @@ EOF
     xkb.layout = "${xkb_layout_value}";
   };
   services.displayManager = {
-    defaultSession = "hyprland";
+    defaultSession = "hyprland-uwsm";
     autoLogin.enable = true;
     autoLogin.user = "${username_value}";
   };
@@ -752,7 +752,7 @@ EOF
     xkb.layout = "${xkb_layout_value}";
   };
   services.displayManager = {
-    defaultSession = "hyprland";
+    defaultSession = "hyprland-uwsm";
     autoLogin.enable = true;
     autoLogin.user = "${username_value}";
   };
