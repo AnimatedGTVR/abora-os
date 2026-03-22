@@ -1,0 +1,80 @@
+fun center_x(image) {
+    return Window.GetX() + Window.GetWidth() / 2 - image.GetWidth() / 2;
+}
+
+fun refresh_callback() {
+    cx = Window.GetX() + Window.GetWidth() / 2;
+    top = Window.GetY() + Window.GetHeight() * 0.20;
+
+    title_abora_sprite.SetX(cx - title_abora_img.GetWidth() - 10);
+    title_abora_sprite.SetY(top);
+
+    title_os_sprite.SetX(cx + 10);
+    title_os_sprite.SetY(top);
+
+    subtitle_sprite.SetX(center_x(subtitle_img));
+    subtitle_sprite.SetY(top + title_abora_img.GetHeight() + 12);
+
+    line_sprite.SetX(center_x(line_img));
+    line_sprite.SetY(top + title_abora_img.GetHeight() + subtitle_img.GetHeight() + 18);
+
+    message_sprite.SetX(center_x(message_img));
+    message_sprite.SetY(top + title_abora_img.GetHeight() + subtitle_img.GetHeight() + 38);
+
+    status_sprite.SetX(center_x(status_img));
+    status_sprite.SetY(top + title_abora_img.GetHeight() + subtitle_img.GetHeight() + 70);
+}
+
+fun set_status(text) {
+    if (text == "") {
+        text = "Loading Abora OS...";
+    }
+
+    status_img = Image.Text(text, 0.74, 0.80, 0.90, "Sans 12", "center");
+    status_sprite.SetImage(status_img);
+}
+
+fun display_normal() {
+    set_status("Starting services...");
+}
+
+fun display_message(text) {
+    set_status(text);
+}
+
+fun hide_message(text) {
+    set_status("Starting services...");
+}
+
+Window.SetBackgroundTopColor(0.01, 0.03, 0.10);
+Window.SetBackgroundBottomColor(0.01, 0.08, 0.16);
+
+title_abora_img = Image.Text("ABORA", 0.22, 0.72, 1.00, "Sans Bold 36", "center");
+title_os_img = Image.Text("OS", 0.57, 0.97, 1.00, "Sans Bold 36", "center");
+subtitle_img = Image.Text("Loading your desktop...", 0.73, 0.87, 0.98, "Sans 14", "center");
+line_img = Image.Text("────────────────────────────", 0.18, 0.66, 0.98, "Sans 16", "center");
+message_img = Image.Text("Boot details", 0.49, 0.63, 0.82, "Sans Bold 11", "center");
+status_img = Image.Text("Starting services...", 0.86, 0.92, 0.98, "Sans 12", "center");
+
+title_abora_sprite = Sprite();
+title_abora_sprite.SetImage(title_abora_img);
+
+title_os_sprite = Sprite();
+title_os_sprite.SetImage(title_os_img);
+
+subtitle_sprite = Sprite();
+subtitle_sprite.SetImage(subtitle_img);
+
+line_sprite = Sprite();
+line_sprite.SetImage(line_img);
+
+message_sprite = Sprite();
+message_sprite.SetImage(message_img);
+
+status_sprite = Sprite();
+status_sprite.SetImage(status_img);
+
+Plymouth.SetRefreshFunction(refresh_callback);
+Plymouth.SetDisplayNormalFunction(display_normal);
+Plymouth.SetDisplayMessageFunction(display_message);
+Plymouth.SetHideMessageFunction(hide_message);

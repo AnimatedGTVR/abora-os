@@ -926,10 +926,12 @@ EOF
 }
 
 write_branding_assets() {
-    mkdir -p /mnt/etc/nixos/abora
+    mkdir -p /mnt/etc/nixos/abora/plymouth
     cp "$title_file" /mnt/etc/nixos/abora/title.txt
     cp /etc/abora/fastfetch-logo.txt /mnt/etc/nixos/abora/fastfetch-logo.txt
     cp /etc/abora/fastfetch-config.jsonc /mnt/etc/nixos/abora/fastfetch-config.jsonc
+    cp /etc/abora/plymouth/abora.plymouth /mnt/etc/nixos/abora/plymouth/abora.plymouth
+    cp /etc/abora/plymouth/abora.script /mnt/etc/nixos/abora/plymouth/abora.script
 }
 
 write_lonis_assets() {
@@ -971,6 +973,12 @@ generate_config() {
 
     cat > /mnt/etc/nixos/configuration.nix <<EOF
 { config, pkgs, ... }:
+let
+  aboraPlymouthTheme = pkgs.runCommandLocal "abora-plymouth-theme" {} ''
+    install -Dm0644 \${./abora/plymouth/abora.plymouth} \${out}/share/plymouth/themes/abora/abora.plymouth
+    install -Dm0644 \${./abora/plymouth/abora.script} \${out}/share/plymouth/themes/abora/abora.script
+  '';
+in
 {
   imports = [ ./hardware-configuration.nix ];
 
@@ -990,6 +998,20 @@ generate_config() {
     efiInstallAsRemovable = true;
   };
   boot.loader.efi.canTouchEfiVariables = false;
+  boot.initrd.systemd.enable = true;
+  boot.initrd.verbose = false;
+  boot.kernelParams = [
+    "quiet"
+    "splash"
+    "udev.log_level=3"
+    "systemd.show_status=auto"
+  ];
+  boot.consoleLogLevel = 3;
+  boot.plymouth = {
+    enable = true;
+    theme = "abora";
+    themePackages = [ aboraPlymouthTheme ];
+  };
 
   networking.hostName = "${hostname_value}";
   networking.networkmanager.enable = true;
@@ -1001,6 +1023,8 @@ generate_config() {
   services.udisks2.enable = true;
   environment.etc."abora/title.txt".source = ./abora/title.txt;
   environment.etc."abora/fastfetch-logo.txt".source = ./abora/fastfetch-logo.txt;
+  environment.etc."abora/plymouth/abora.plymouth".source = ./abora/plymouth/abora.plymouth;
+  environment.etc."abora/plymouth/abora.script".source = ./abora/plymouth/abora.script;
   environment.etc."xdg/fastfetch/config.jsonc".source = ./abora/fastfetch-config.jsonc;
   environment.etc."skel/.config/fastfetch/config.jsonc".source = ./abora/fastfetch-config.jsonc;
   environment.etc."issue".text = ''

@@ -49,6 +49,8 @@
   environment.etc."abora/title.txt".source = ../../assets/abora-title.txt;
   environment.etc."abora/fastfetch-logo.txt".source = ../../assets/fastfetch-logo.txt;
   environment.etc."abora/fastfetch-config.jsonc".source = ../../assets/fastfetch-config.jsonc;
+  environment.etc."abora/plymouth/abora.plymouth".source = ../../assets/plymouth/abora.plymouth;
+  environment.etc."abora/plymouth/abora.script".source = ../../assets/plymouth/abora.script;
   environment.etc."abora/nixpkgs".source = pkgs.path;
   environment.etc."abora/lonis/hyprland.conf".source = ../../assets/lonis/hyprland.conf;
   environment.etc."abora/lonis/waybar-config.jsonc".source = ../../assets/lonis/waybar-config.jsonc;
